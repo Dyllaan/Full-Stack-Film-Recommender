@@ -1,0 +1,4 @@
+COPY ratings(user_id, movie_id, rating, timestamp)
+FROM 'C:\Users\Louis\Desktop\Project code rework\ml-latest-small\ratings.csv'
+DELIMITER ','
+CSV HEADER;

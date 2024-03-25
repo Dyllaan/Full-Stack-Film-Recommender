@@ -1,0 +1,224 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/**
+ * @author Louis Figes
+ * @generated Github Copilot was used in the creation of this code.
+ */
+html, body, label {
+  font-family: system-ui;
+}
+
+@layer base {
+    body {
+        @apply m-0 bg-slate-800 text-white;
+    }
+
+    .page {
+        @apply w-full p-4;
+    }
+    h1 {
+        @apply text-4xl font-bold text-pink-700;
+    }
+
+    h2 {
+        @apply text-3xl font-bold text-slate-100 drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.8)];
+    }
+    h3 {
+        @apply text-2xl font-bold text-gray-500 drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.8)];
+    }
+    h4 {
+        @apply text-lg text-slate-300 font-bold drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.8)];
+    }
+    p {
+        @apply text-base text-gray-300;
+    }
+
+    .active {
+        @apply text-slate-400;
+    }
+
+    .nav-item {
+        @apply p-2 text-xl hover:text-pink-900 hover-scale;
+    }
+
+    header h1 {
+        @apply hover:text-pink-900 hover-scale; 
+    }
+
+    header {
+        @apply sticky z-50 top-0 primary text-neutral-500 flex justify-between items-center;
+    }
+
+    footer {
+        @apply sticky z-50 p-1 primary bottom-0 text-neutral-500 flex  text-center overflow-hidden;
+    }
+  
+    .authors p {
+        @apply text-gray-500 italic text-xs;
+    }
+    
+    .component-header button {
+        @apply user-input;
+    }
+
+    input, select {
+        @apply user-input
+    }
+    
+    textarea {
+        @apply user-input w-[50vw] h-[10vh];
+    }
+
+    .user-input {
+        @apply p-2 py-2 px-4 rounded-lg shadow-sm text-sm font-medium text-white secondary hover:primary hover-scale disabled:disabled;
+    }
+
+    .basic-div {
+        @apply max-w-md text-center gap-2 primary text-neutral-300 rounded-lg border border-solid border-slate-600 mx-auto p-4;
+    }
+
+    .disabled {
+        @apply opacity-50 cursor-not-allowed;
+    }
+
+    .chi-form {
+        @apply p-4 mx-auto w-1/2 flex flex-col gap-2 m-2;
+    }
+
+    .chi-form button {
+        @apply w-1/2 primary hover:bg-pink-800 mx-auto text-gray-300 disabled:disabled text-white py-4 px-6 rounded-lg;
+    }
+
+    .chi-form input {
+        @apply primary w-full p-4 mx-auto rounded-lg text-gray-300;
+    }
+
+    .chi-form label {
+        @apply block text-center text-gray-300 font-bold mb-2;
+    }
+
+    .component-header {
+        @apply text-white;
+    }
+
+    .search-bar {
+        @apply p-2 text-white w-full;
+    }
+
+    .primary {
+        @apply bg-custom;
+    }
+
+    .primary-text {
+        @apply text-slate-700;
+    }
+
+    .secondary {
+        @apply bg-slate-700;
+    }
+
+    .secondary-text {
+        @apply text-slate-700;
+    }
+
+    .tertiary {
+        @apply bg-slate-800;
+    }
+
+    .tertiary-text {
+        @apply text-slate-800;
+    }
+
+    .valid {
+        @apply border border-green-500;
+    }
+
+    .invalid {
+        @apply border border-red-500;
+    }
+
+    .content-item {
+        @apply primary hover:secondary outline outline-slate-700 outline-1 cursor-pointer p-2;
+    }
+
+    .award {
+        @apply text-yellow-400 font-bold;
+    }
+
+    .disabled {
+        @apply opacity-50 cursor-not-allowed;
+    }
+
+    .container {
+        @apply tertiary p-4 border border-slate-400 border-4 rounded-2xl m-2;
+    }
+
+    .border-main {
+        @apply border-pink-700;
+    }
+
+    .homepage-info {
+        @apply bg-slate-600 p-1 rounded-lg border-main px-2 lg:w-1/6 flex-grow overflow-hidden hover-scale;
+    }
+
+    .hover-scale {
+        @apply hover:scale-1025 transition-all duration-200;
+    }
+
+    /* W3 SCHOOLS https://www.w3schools.com/howto/howto_css_primary_scrollbar.asp
+    * converted to tailwind and styled
+    */
+    ::-webkit-scrollbar {
+        @apply primary w-2.5;
+    }
+
+    ::-webkit-scrollbar-track {
+        @apply primary outline outline-1 outline-slate-600;
+    }
+   
+    ::-webkit-scrollbar-thumb {
+        @apply bg-slate-500 rounded-lg;
+    }
+  
+    ::-webkit-scrollbar-thumb:hover {
+        @apply bg-slate-400; 
+    }
+
+    /** toggle switch w3schools remade in tailwind https://www.w3schools.com/howto/howto_css_switch.asp  */
+
+    .switch {
+        @apply relative w-16 h-[34px] inline-block;
+      }
+      
+      .switch input { 
+        @apply opacity-0 w-0 h-0;
+      }
+      
+      .slider {
+        @apply outline outline-red-700 absolute cursor-pointer top-0 left-0 right-0 bottom-0 secondary transition-all;
+      }
+      
+      .slider:before {
+        @apply absolute primary rounded-full transition-all left-1 bottom-1 w-6 h-6 content-[""];
+      }
+      
+      input:checked + .slider {
+        @apply bg-slate-700 outline outline-green-700;
+      }
+
+      input:checked + .slider:before {
+        -webkit-transform: translateX(26px);
+        -ms-transform: translateX(26px);
+        transform: translateX(26px);
+      }
+      
+    .slider.round {
+        @apply rounded-full;
+    }
+      
+    .slider.round:before {
+        @apply rounded-full;
+    }
+}
