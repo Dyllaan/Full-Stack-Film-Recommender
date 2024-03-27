@@ -1,16 +1,14 @@
 from django.http import JsonResponse
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
-from icp_api.api_models.movie_recommender import MovieRecommender  # Adjust the import path as necessary
-from icp_api.models import Movie  # Ensure this import is correct for your project
-
-recommender = MovieRecommender()
+from icp_api.models import Movie
+from icp_api.init_recommender import cf_recommender
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def recommend_movies(request):
     user_id = request.user.id
-    recommendations = recommender.get_movie_recommendations(user_id)
+    recommendations = cf_recommender.get_movie_recommendations(user_id)
 
     # Fetch movie titles for the recommended IDs
     movie_ids = [rec['movie_id'] for rec in recommendations]

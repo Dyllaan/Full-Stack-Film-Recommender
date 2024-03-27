@@ -11,4 +11,4 @@ class Movie(models.Model):
         db_table = 'movies'  # Name of the existing table
 
     def __str__(self):
-        return self.title
+        return self.movie_title

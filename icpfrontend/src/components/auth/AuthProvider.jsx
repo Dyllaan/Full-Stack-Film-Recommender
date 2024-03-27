@@ -19,13 +19,16 @@ export default function AuthProvider ({children}) {
   const [signedIn, setSignedIn] = useState(false);
   const [accessToken, setAccessToken] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [requestLoading, setRequestLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+  const [getStarted, setGetStarted] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     checkToken();
   }, [loading]);
+
 
   function clearError() {
     setError(null);
@@ -51,6 +54,22 @@ export default function AuthProvider ({children}) {
     navigate("/login");
   }
 
+  async function getRatings() {
+    setRequestLoading(true);
+    const response = await api.get('ratings', { Authorization: `Bearer ${accessToken}` });
+    if(response.success) {
+      setRequestLoading(false);
+      if(response.data.results.length === 0) {
+        setGetStarted(true);
+      }
+      return response.data;
+    } else {
+      setRequestLoading(false);
+      handleError(response.data.message);
+    }
+
+  }
+
   async function checkToken() {
     if(loading && localStorage.getItem('token') !== null && signedIn === false) {
       const token = localStorage.getItem('token');
@@ -63,7 +82,8 @@ export default function AuthProvider ({children}) {
   async function currentUser(token) {
     const response = await api.get('user', { Authorization: `Bearer ${token}` });
     if(response.success) {
-      setUserFromResponse(response.data);
+      setUserFromCheckCurrent(response.data);
+      setAccessToken(token);
     } else {
       handleError(response.data.message);
     }
@@ -77,18 +97,25 @@ export default function AuthProvider ({children}) {
     const response = await api.post('user/login', formData);
     if (response.success) {
       setSuccess("You have successfully logged in.");
-      setUserFromResponse(response.data);
+      setUserFromLogin(response.data);
     } else {
       signOut();
       setError(response.data.message);
     }
   }
   
-  function setUserFromResponse(response) {
+  function setUserFromLogin(response) {
     console.log(response);
     localStorage.setItem('token', response.access);
-    setAccessToken(response.jwt);
+    setAccessToken(response.access);
     setUser(response.user);
+    setSignedIn(true);
+    setLoading(false);
+    setError(null);
+  }
+  
+  function setUserFromCheckCurrent(response) {
+    setUser(response);
     setSignedIn(true);
     setLoading(false);
     setError(null);
@@ -104,7 +131,7 @@ export default function AuthProvider ({children}) {
     formData.append('password', password);
     const response = await api.post('user/register', formData);
     if(response.success) {
-      setUserFromResponse(response.data);
+      setUserFromLogin(response.data);
       setSuccess("You have successfully registered.");
     } else {
       setError(response.data.message);
@@ -128,7 +155,7 @@ export default function AuthProvider ({children}) {
     const response = await api.put('current-user', JSON.stringify(data), headers);
     if(response.success) {
       setSuccess("Profile updated successfully.");
-      setUserFromResponse(response.data);
+      setUserFromCheckCurrent(response.data);
       return response.data.message;
     } else {
       setError(response.data.message);
@@ -162,7 +189,7 @@ export default function AuthProvider ({children}) {
   }
 
   return (
-    <AuthContext.Provider value={{ signedIn, accessToken, user, login, signOut, loading, register, editProfile, displayMessages  }}>
+    <AuthContext.Provider value={{ signedIn, accessToken, user, login, signOut, loading, register, editProfile, displayMessages, getRatings  }}>
       {children}
     </AuthContext.Provider>
   );

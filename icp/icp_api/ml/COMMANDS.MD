@@ -18,6 +18,10 @@
 - Copy Ratings data
 - \copy icp_api_rating(user_id, movie_id, rating, created_at) FROM 'C:\Users\Louis\Desktop\ICP\ml-latest-small\ratings.csv' WITH (FORMAT csv, HEADER true, DELIMITER ',');
 
+- Copy Tags data
+- \copy icp_api_tag(user_id, movie_id, tag, timestamp) FROM 'C:\Users\Louis\Desktop\ICP\icp\icp_api\ml\ratings.csv' WITH (FORMAT csv, HEADER true, DELIMITER ',');
+
+
 
 IGNORE DUPLICATES
 

@@ -9,28 +9,24 @@ import * as api from '../components/auth/api';
  * @generated GitHub Copilot was used in the creation of this code.
  */
 const useFetchData = (initialEndpoint) => {
-    const { accessToken } = useAuth();
+    const { accessToken, loading : userLoading } = useAuth();
     const [endpoint, setEndpoint] = useState(initialEndpoint);
     const [loading, setLoading] = useState(true);
     const [data, setData] = useState([]);
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        if (loading) {
+        if (loading && !userLoading) {
             fetchData();
         }
-    }, [endpoint, loading]);
+    }, [endpoint, loading, userLoading]);
 
     async function fetchData() {
         try {
             const headers = accessToken ? { Authorization: `Bearer ${accessToken}` } : {};
             const response = await api.get(endpoint, headers);
             if (response.success) {
-                if(response.data.results) {
-                    setData(response.data.results);
-                } else {
-                    setData(response.data);
-                }
+                setData(response.data);
             } else {
                 throw new Error('No data found');
             }

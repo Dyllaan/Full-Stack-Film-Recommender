@@ -11,6 +11,7 @@ import Logout from './components/profile/Logout';
 import UnAuthed from './components/profile/UnAuthed';
 import PageNotFound from './pages/PageNotFound';
 import FilmPage from './pages/FilmPage';
+import GetStartedPage from './pages/GetStartedPage';
 // Import Swiper styles
 import 'swiper/css';
 import 'swiper/css/pagination';
@@ -33,6 +34,7 @@ const App = () => {
               <Route path='/register' element={<UnAuthed><AuthPage/></UnAuthed>}/>
               <Route path="/profile" element={<Restricted><ProfilePage /></Restricted>}/>
               <Route path="/logout" element={<Restricted><Logout /></Restricted>}/>
+              <Route path="/get-started" element={<Restricted><GetStartedPage /></Restricted>}/>
               <Route path="*" element={<PageNotFound />}/>
             </Routes>
           </div>
