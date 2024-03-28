@@ -8,6 +8,7 @@ from tensorflow.keras.optimizers import Adam
 from icp_api.models import Movie, Rating
 import pandas as pd
 from tensorflow.keras.models import load_model
+from background_task import background
 
 class CFRecommender:
     
@@ -38,13 +39,54 @@ class CFRecommender:
         y = self.ratings['rating'].values
         self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(X, y, test_size=0.1, random_state=42)
 
-        try:
-            self.load_model()
-            print("Model loaded successfully.")
-        except IOError:
-            print("Model not found. Training a new model.")
-            self.model = self.build_model()
+        #try:
+            #self.load_model()
+            #print("Model loaded successfully.")
+        #except IOError:
+            #print("Model not found. Training a new model.")
+        self.model = self.build_model()
+        self.train_model()
+
+    # Retrain every 3 minutes
+    @background(schedule=180)
+    def update_and_retrain(self):
+        # Fetch new ratings data
+        new_ratings_data = Rating.objects.all().values_list('user_id', 'movie_id', 'rating')
+        new_ratings_df = pd.DataFrame(list(new_ratings_data), columns=['user_id', 'movie_id', 'rating']).astype({'rating': float})
+
+        # Check for any changes
+        if not self.ratings.empty:
+            # Convert to tuples for efficiency
+            current_data_set = set(tuple(x) for x in self.ratings[['user_id', 'movie_id', 'rating']].values)
+            new_data_set = set(tuple(x) for x in new_ratings_df.values)
+
+            # Return early, preventing waste of resources
+            if current_data_set == new_data_set:
+                print("No new ratings data found. Skipping retrain.")
+                return
+
+        # Check for new users or movies not in the existing LabelEncoders
+        new_users = set(new_ratings_df['user_id']) - set(self.user_enc.classes_)
+        new_movies = set(new_ratings_df['movie_id']) - set(self.item_enc.classes_)
+
+        if new_users or new_movies:
+            # This scenario requires expanding the embeddings which is complex
+            # For simplicity, re-initialize and retrain from scratch
+            # In practice, you might explore more nuanced strategies to update embeddings
+            self.startup()  # or a more sophisticated method to handle new users/movies specifically
+        else:
+            # If there are no new users or movies, you can append new ratings to your dataset
+            # and retrain or fine-tune the model
+            self.ratings = pd.concat([self.ratings, new_ratings_df], ignore_index=True)
+            
+            # Update your training and testing sets as needed
+            X = self.ratings[['user', 'movie']].values
+            y = self.ratings['rating'].values
+            self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(X, y, test_size=0.1, random_state=42)
+
+            # Retrain or fine-tune your model
             self.train_model()
+
 
     def build_model(self):
         user_input = Input(shape=(1,), name='user_input')
@@ -64,11 +106,11 @@ class CFRecommender:
         return model
     
     def load_model(self):
-        self.model = load_model('movie_recommender.h5')
+        self.model = load_model('movi1_recommender.h5')
 
     def train_model(self):
         self.model.fit([self.X_train[:, 0], self.X_train[:, 1]], self.y_train, batch_size=64, epochs=5, validation_data=([self.X_test[:, 0], self.X_test[:, 1]], self.y_test), verbose=1)
-        self.model.save('movie_recommender.h5')
+        self.model.save('movi1_recommender.h5')
 
     def get_movie_recommendations(self, user_id, num_recommendations=10):
         

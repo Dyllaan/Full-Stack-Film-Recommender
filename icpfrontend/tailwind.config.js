@@ -24,12 +24,17 @@ export default {
         '400': '400ms',
       },
       backgroundImage: {
-        'education': "url('/education.jpg')",
+        'placeholder': "url('/placeholder.png')",
       },
       backgroundColor: {
         'custom': '#0F141C',      
         'deep-blue': '#08052b',
         'deep-purple': '#0f0212',
+        'off-black': '#121212',
+        'secondary-black': '#181818',
+      },
+      textColor: {
+        'off-white': '#FAF9F6',
       },
       borderColor: {
         'custom': '#181f66',

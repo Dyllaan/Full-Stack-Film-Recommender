@@ -18,9 +18,6 @@ function AuthPage() {
         <SignIn login={login} /> 
         <Register register={register} />
       </div>
-      <div>
-        <p className="text-center">This website is <span className="text-red-800 font-bold">NOT</span> an official CHI website or in any way affiliated.</p>
-      </div>
     </div>
     );
 }

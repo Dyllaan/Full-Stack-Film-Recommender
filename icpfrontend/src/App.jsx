@@ -12,6 +12,7 @@ import UnAuthed from './components/profile/UnAuthed';
 import PageNotFound from './pages/PageNotFound';
 import FilmPage from './pages/FilmPage';
 import GetStartedPage from './pages/GetStartedPage';
+import { Toaster } from 'sonner';
 // Import Swiper styles
 import 'swiper/css';
 import 'swiper/css/pagination';
@@ -26,6 +27,7 @@ const App = () => {
     <div className="flex flex-col min-h-screen">
         <AuthProvider>
           <Header />
+          <Toaster />
           <div className="flex-grow overflow-x-hidden m-4">
             <Routes>
               <Route path="/" element={<HomePage />}/>

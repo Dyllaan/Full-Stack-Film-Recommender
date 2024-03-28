@@ -32,8 +32,7 @@ function Header() {
             <nav className="flex items-center justify-between py-2 px-8 w-screen">
                 <div className="flex items-center">
                     <NavLink to="/"><h1>CHI 2023</h1></NavLink>
-                    <NavItem pageName="Content" pageUrl="/content" />
-                    <NavItem pageName="Countries" pageUrl="/countries" />
+                    <NavItem pageName="Explore" pageUrl="/content" />
                 </div>
                 <div className="flex items-center">
                     {displayMessages()}

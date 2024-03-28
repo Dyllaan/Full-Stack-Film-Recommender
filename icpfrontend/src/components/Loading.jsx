@@ -11,13 +11,15 @@ import PropTypes from "prop-types";
 function Loading(props) {
     const {loading} = props;
     return (
-        <HashLoader
-            color={"#123abc"}
-            loading={loading}
-            size={50}
-            aria-label="Loading Spinner"
-            data-testid="loader"
-        />
+        <div className="flex flex-col items-center p-4">
+            <HashLoader
+                color={"#123abc"}
+                loading={loading}
+                size={128}
+                aria-label="Loading Spinner"
+                data-testid="loader"
+            />
+        </div>
     );
 }
 

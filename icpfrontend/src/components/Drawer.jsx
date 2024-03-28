@@ -1,7 +1,7 @@
 import Drawer from '@mui/material/Drawer';
 import PropTypes from 'prop-types';
 
-const MyDrawer = ({ isOpen, setIsOpen, selectedSlide, posters }) => {
+const MyDrawer = ({ isOpen, setIsOpen, selectedSlide, films }) => {
   // Function to close the drawer
   const toggleDrawer = (open) => (event) => {
     if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
@@ -11,7 +11,7 @@ const MyDrawer = ({ isOpen, setIsOpen, selectedSlide, posters }) => {
   };
 
   // Access the selected poster data using selectedSlide
-  const selectedPoster = posters[selectedSlide];
+  const selectedPoster = films[selectedSlide];
 
   return (
     <Drawer
@@ -37,7 +37,7 @@ MyDrawer.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   setIsOpen: PropTypes.func.isRequired,
   selectedSlide: PropTypes.number,
-  posters: PropTypes.array.isRequired,
+  films: PropTypes.array.isRequired,
 };
 
 export default MyDrawer;

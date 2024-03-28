@@ -14,8 +14,9 @@ import { FreeMode, Pagination } from 'swiper/modules';
 
 import PropTypes from 'prop-types';
 import MyDrawer from '../Drawer';
+import RateFilmCard from '../films/RateFilmCard';
 
-const FilmCarousel = ({ posters }) => {
+const FilmCarousel = ({ films }) => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedSlide, setSelectedSlide] = useState(null); // Track the selected slide
 
@@ -26,6 +27,9 @@ const FilmCarousel = ({ posters }) => {
   };
 
   const url = `https://image.tmdb.org/t/p/w500`;
+
+  if(!films) return;
+  if(films.length === 0) return;
 
   return (
     <>
@@ -39,22 +43,31 @@ const FilmCarousel = ({ posters }) => {
           clickable: true,
         }}
         modules={[FreeMode, Pagination]}
-        className="mySwiper"
+        className="swiper p-4"
       >
-        {posters.map((poster, index) => (
+        {films && films.length > 0 && films.map((poster, index) => (
           <SwiperSlide key={index} className='hover-scale' onClick={() => handleSlideClick(index)}>
-            <img src={url + poster.poster_path} alt={`Movie Poster ${index}`} />
+            {poster.poster_path ? (
+              <div>
+                <RateFilmCard film={poster} />
+              </div>
+            ) : (
+              <div className="text-center bg-secondary-black">
+                <h2 className="text-2xl">No Poster Available</h2>
+              </div>
+            )}
+
           </SwiperSlide>
         ))}
       </Swiper>
-      <MyDrawer isOpen={isDrawerOpen} setIsOpen={setIsDrawerOpen} selectedSlide={selectedSlide} posters={posters} />
+      <MyDrawer isOpen={isDrawerOpen} setIsOpen={setIsDrawerOpen} selectedSlide={selectedSlide} films={films} />
     </>
   );
 };
 
 
 FilmCarousel.propTypes = {
-    posters: PropTypes.array.isRequired,
-    };
+  films: PropTypes.array.isRequired,
+};
 
 export default FilmCarousel;
