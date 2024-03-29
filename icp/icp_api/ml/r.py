@@ -5,8 +5,8 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import linear_kernel
 
 # Load data
-ratings = pd.read_csv('moviefiles/ratings.csv')
-movies = pd.read_csv('moviefiles/movies.csv')
+ratings = pd.read_csv('ratings.csv')
+movies = pd.read_csv('movies.csv')
 
 # Collaborative Filtering
 reader = Reader(rating_scale=(0.5, 5.0))

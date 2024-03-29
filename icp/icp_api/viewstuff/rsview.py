@@ -3,12 +3,17 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from icp_api.models import Movie
 from icp_api.init_recommender import cf_recommender
+<<<<<<< Updated upstream
+=======
+from icp_api.serializers import MovieSerializer
+>>>>>>> Stashed changes
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def recommend_movies(request):
     user_id = request.user.id
     recommendations = cf_recommender.get_movie_recommendations(user_id)
+<<<<<<< Updated upstream
 
     # Fetch movie titles for the recommended IDs
     movie_ids = [rec['movie_id'] for rec in recommendations]
@@ -22,3 +27,9 @@ def recommend_movies(request):
 
     return JsonResponse(recommendations, safe=False)
 
+=======
+
+    print(recommendations)
+
+    return JsonResponse(recommend_movies, safe=False)
+>>>>>>> Stashed changes
