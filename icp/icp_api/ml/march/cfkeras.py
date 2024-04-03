@@ -2,14 +2,12 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 import keras
-from keras import layers
-from keras import ops
 from sklearn.metrics import mean_squared_error
 from math import sqrt
 from keras.callbacks import EarlyStopping
 from sklearn.preprocessing import MultiLabelBinarizer
-import tensorflow as tf
-from keras import regularizers
+from gensim.models import Word2Vec
+from recommender_net import RecommenderNet
 
 class CFRecommender:
 
@@ -22,13 +20,40 @@ class CFRecommender:
         moviesFile = r"C:\Users\Louis\Desktop\ICP\icp\icp_api\ml\movies.csv"
         self.movie_df = pd.read_csv(moviesFile)
 
+        tagsFile = r"C:\Users\Louis\Desktop\ICP\icp\icp_api\ml\tags.csv"
+        self.tags_df = pd.read_csv(tagsFile)
+
         self.prepare_data()
-    
+
+    def prepare_word2vec(self):
+        # Assuming self.tags_df is already loaded with userId, movieId, tag, and timestamp columns
+        # Group tags by movieId and aggregate them into a list
+        self.tags_df['processed_tags'] = self.tags_df['tag'].str.lower().str.replace('[^a-zA-Z0-9 ]', '', regex=True)
+        movie_tags = self.tags_df.groupby('movieId')['processed_tags'].apply(list).reset_index()
+        model = Word2Vec(sentences=movie_tags['processed_tags'], vector_size=50, window=5, min_count=1, workers=4)
+
+        # Save the model for later use
+        model.save("movie_tags_word2vec.model")
+
+        movie_tags['tag_embedding'] = movie_tags['processed_tags'].apply(lambda x: self.get_movie_tag_embedding(x, model))
+
+        # Ensure the tag embeddings are in the correct format for model training
+        return np.stack(movie_tags['tag_embedding'].values)
+
+    def get_movie_tag_embedding(self, movie_tags_row, w2v_model):
+        # Average the Word2Vec vectors for all tags associated with the movie
+        vectors = [w2v_model.wv[tag] for tag in movie_tags_row if tag in w2v_model.wv]
+        if vectors:
+            return np.mean(vectors, axis=0)
+        else:
+            return np.zeros(w2v_model.vector_size)
+
     
     def prepare_data(self):
         #genres
         self.movie_df['genres'] = self.movie_df['genres'].apply(lambda x: x.split('|'))
         self.all_genres = sorted(set(genre for genres in self.movie_df['genres'] for genre in genres))
+        
         # Initialize the MultiLabelBinarizer
         mlb = MultiLabelBinarizer()
         mlb.fit([self.all_genres])
@@ -58,6 +83,18 @@ class CFRecommender:
         # Normalize the targets between 0 and 1. Makes it easy to train.
         y = self.ratings_df["rating"].apply(lambda x: (x - self.min_rating) / (self.max_rating - self.min_rating)).values
         # Assuming training on 90% of the data and validating on 10%.
+        
+
+        # Convert genres_encoded from lists of encoded genres to a numpy array for easy concatenation
+        genre_encoded = np.array(self.movie_df['genres_encoded'].tolist())
+        
+        # You now need to ensure that the user and movie inputs are combined with the genre information
+        x = np.hstack([
+            self.ratings_df[['user', 'movie']].values, 
+            genre_encoded[self.ratings_df['movie'].values]  # Lookup the genre encoding based on the movie index
+        ])
+        
+        # Your existing code to split into training and validation sets follows
         train_indices = int(0.9 * self.ratings_df.shape[0])
         x_train, x_val, y_train, y_val = (
             x[:train_indices],
@@ -65,12 +102,13 @@ class CFRecommender:
             y[:train_indices],
             y[train_indices:],
         )
+
         self.build_model(num_users, num_movies, num_genres, x_train, x_val, y_train, y_val)
 
     def build_model(self, num_users, num_movies, num_genres, x_train, x_val, y_train, y_val):
         # Now modify the self.model instantiation
         self.model = RecommenderNet(num_users, num_movies, num_genres, self.EMBEDDING_SIZE, dropout_rate=0.5)
-        self.model.compile(loss=keras.losses.BinaryCrossentropy(), optimizer=keras.optimizers.Adam(learning_rate=0.001))
+        self.model.compile(loss=keras.losses.BinaryCrossentropy(), optimizer=keras.optimizers.Adam(learning_rate=0.005))
 
         # Setup EarlyStopping
         early_stopping = EarlyStopping(monitor='val_loss', min_delta=0.001, patience=3, restore_best_weights=True)
@@ -79,11 +117,13 @@ class CFRecommender:
             x=x_train,
             y=y_train,
             batch_size=32,
-            epochs=3,
+            epochs=2,
             verbose=1,
             validation_data=(x_val, y_val),
+            callbacks=[early_stopping]
         )
         self.evaluate_model(x_val, y_val, self.min_rating, self.max_rating, self.history)
+
     
     def evaluate_model(self, x_val, y_val, min_rating, max_rating, history):
         # Predict the normalized ratings for the validation set
@@ -113,18 +153,30 @@ class CFRecommender:
         movies_not_watched = self.movie_df[
             ~self.movie_df["movieId"].isin(movies_watched_by_user.movieId.values)
         ]["movieId"]
-        movies_not_watched = list( 
+        movies_not_watched = list(
             set(movies_not_watched).intersection(set(self.movie2movie_encoded.keys()))
         )
-        movies_not_watched = [[self.movie2movie_encoded.get(x)] for x in movies_not_watched]
+
+        movies_not_watched_indices = [self.movie2movie_encoded.get(x) for x in movies_not_watched]
         user_encoder = self.user2user_encoded.get(user_id)
-        user_movie_array = np.hstack(
-            ([[user_encoder]] * len(movies_not_watched), movies_not_watched)
-        )
-        ratings = self.model.predict(user_movie_array).flatten()
+        
+        # Prepare the genre data for movies not watched by user
+        # Ensure the genre_encoded array is properly aligned with the movie indices
+        genres_not_watched = np.array(self.movie_df['genres_encoded'].tolist())[movies_not_watched_indices]
+        
+        # Create an array with repeated user index for length of movies_not_watched list
+        user_indices = np.array([user_encoder] * len(movies_not_watched_indices))
+        
+        # Combine user indices, movie indices, and genres into a single array for prediction
+        user_movie_genre_array = np.hstack((user_indices[:, None], np.array(movies_not_watched_indices)[:, None], genres_not_watched))
+
+        # Predict the ratings for the not watched movies with genres
+        ratings = self.model.predict(user_movie_genre_array).flatten()
+
+        # Get the top 10 ratings indices
         top_ratings_indices = ratings.argsort()[-10:][::-1]
         recommended_movie_ids = [
-            self.movie_encoded2movie.get(movies_not_watched[x][0]) for x in top_ratings_indices
+            self.movie_encoded2movie.get(movies_not_watched_indices[x]) for x in top_ratings_indices
         ]
 
         print("Showing recommendations for user: {}".format(user_id))
@@ -147,6 +199,7 @@ class CFRecommender:
         for row in recommended_movies.itertuples():
             print(row.title, ":", row.genres)
 
+
     def save_model(self):
         self.model.save('trained_model.keras')
     
@@ -155,58 +208,5 @@ class CFRecommender:
         self.save_model()
         self.recommend()
 
-class RecommenderNet(keras.Model):
-    def __init__(self, num_users, num_movies, num_genres, embedding_size, dropout_rate=0.5, **kwargs):
-        super(RecommenderNet, self).__init__(**kwargs)
-        self.num_users = num_users
-        self.num_movies = num_movies
-        self.num_genres = num_genres
-        self.embedding_size = embedding_size
-        
-        # User and Movie Embeddings
-        self.user_embedding = layers.Embedding(input_dim=num_users, output_dim=embedding_size,
-                                               embeddings_initializer="he_normal",
-                                               embeddings_regularizer=regularizers.l2(1e-6))
-        self.user_bias = layers.Embedding(input_dim=num_users, output_dim=1)
-        
-        self.movie_embedding = layers.Embedding(input_dim=num_movies, output_dim=embedding_size,
-                                                embeddings_initializer="he_normal",
-                                                embeddings_regularizer=regularizers.l2(1e-6))
-        self.movie_bias = layers.Embedding(input_dim=num_movies, output_dim=1)
-        
-        # Dropout layer for movie embedding
-        self.movie_dropout = layers.Dropout(dropout_rate)
-
-        # Dense layer for processing genres - assuming direct input of encoded genres as dense vector
-        self.genre_dense = layers.Dense(embedding_size, activation="relu")
-
-        # Additional Dense layers for combining features
-        self.combined_dense1 = layers.Dense(64, activation="relu")
-        self.combined_dense2 = layers.Dense(1)
-
-    def call(self, inputs):
-        # Assuming inputs = [user_input, movie_input], without genre input for simplicity
-        user_input, movie_input = inputs[:, 0], inputs[:, 1]
-        
-        user_vector = self.user_embedding(user_input)
-        user_bias = self.user_bias(user_input)
-        
-        movie_vector = self.movie_embedding(movie_input)
-        movie_vector = self.movie_dropout(movie_vector)  # Apply dropout to movie vector
-        movie_bias = self.movie_bias(movie_input)
-        
-        # Combine features: user_vector, movie_vector (genre_vector is optional, depends on your input)
-        combined_features = tf.concat([user_vector, movie_vector], axis=1)
-        
-        # Process combined features with dense layers
-        x = self.combined_dense1(combined_features)
-        x = self.combined_dense2(x)
-        
-        # Add biases
-        x = x + user_bias + movie_bias
-        
-        return tf.nn.sigmoid(x)
-
-    
 recommender = CFRecommender()
 recommender.run()

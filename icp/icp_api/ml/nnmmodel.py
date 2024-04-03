@@ -5,6 +5,7 @@ from sklearn.preprocessing import LabelEncoder
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Input, Embedding, Flatten, Dense, Concatenate
 from tensorflow.keras.optimizers import Adam
+from math import sqrt
 
 class MovieRecommender:
     def __init__(self):
@@ -50,6 +51,15 @@ class MovieRecommender:
 
     def train_model(self):
         self.model.fit([self.X_train[:, 0], self.X_train[:, 1]], self.y_train, batch_size=64, epochs=5, validation_data=([self.X_test[:, 0], self.X_test[:, 1]], self.y_test), verbose=1)
+        # Assuming model_evaluation is the result from model.evaluate() on your test set
+        model_evaluation = self.model.evaluate([self.X_test[:, 0], self.X_test[:, 1]], self.y_test, verbose=0)
+
+        # model.evaluate() returns the mean squared error (MSE) since the model was compiled with loss='mean_squared_error'
+        mse = model_evaluation
+
+        # Calculate the root mean square error (RMSE)
+        rmse = sqrt(mse)
+        print(f"RMSE: {rmse}")
 
     def get_movie_recommendations(self, user_id_example, num_recommendations=10):
         user_id_example = self.user_enc.transform([user_id_example])[0]  # Transform the user ID
@@ -69,3 +79,6 @@ class MovieRecommender:
         } for movie_id, rating in top_movie_recommendations]
 
         return top_movies
+
+recommender = MovieRecommender()
+print(recommender.get_movie_recommendations(user_id_example=153))

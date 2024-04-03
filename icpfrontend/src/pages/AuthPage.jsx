@@ -1,6 +1,8 @@
 import Register from '../components/profile/Register';
 import SignIn from '../components/profile/SignIn';
 import useAuth from '../components/auth/useAuth';
+import { useState } from 'react';
+import { Button, Box } from '@mui/material';
 /**
  * 
  * A login  / register page.
@@ -11,15 +13,18 @@ import useAuth from '../components/auth/useAuth';
 
 function AuthPage() {
   const {login, register} = useAuth();
+  const [isLogin, setIsLogin] = useState(true);
 
   return (
-    <div className="page flex flex-col">
+    <div className="flex flex-col">
       <div className="w-[80vw] container text-center flex flex-col lg:flex-row mx-auto overflow-hidden">
-        <SignIn login={login} /> 
-        <Register register={register} />
+        {isLogin ? <SignIn login={login} /> : <Register register={register} />}
+        <Box>
+          <Button onClick={() => setIsLogin(!isLogin)}>{isLogin ? "Register" : "Login"}</Button>
+        </Box>
       </div>
       <div>
-        <p className="text-center">This website is <span className="text-red-800 font-bold">NOT</span> an official CHI website or in any way affiliated.</p>
+        <p className="text-center text-lg">This website is based on the <span className="text-red-800 font-bold">MovieLens</span> dataset</p>
       </div>
     </div>
     );

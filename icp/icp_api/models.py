@@ -6,3 +6,4 @@ from .api_models.ratingmodel import Rating
 from .api_models.tmdb_posters_model import TMDbPoster
 from .api_models.tmdbmodel import TMDb
 from .api_models.tagmodel import Tag
+from .api_models.movie_slug import MovieSlug

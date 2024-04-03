@@ -5,6 +5,7 @@ from icp_api.models import Movie
 from icp_api.models import Rating
 from django.contrib.auth.hashers import make_password
 from icp_api.api_serializers.movieserializer import MovieSerializer
+from icp_api.api_serializers.rating_serializer import RatingSerializer
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -22,8 +23,3 @@ class GroupSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Group
         fields = ['url', 'name']
-    
-class RatingSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Rating
-        fields = '__all__'

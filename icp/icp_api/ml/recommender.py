@@ -5,7 +5,7 @@ from surprise import KNNBasic
 from surprise import accuracy
 
 # Load the data from ratings.csv
-data = pd.read_csv('path_to_your_dataset/ratings.csv')
+data = pd.read_csv('ratings.csv')
 
 # The columns must correspond to user id, item id and ratings (in that order).
 reader = Reader(line_format='user item rating timestamp', sep=',', skip_lines=1)

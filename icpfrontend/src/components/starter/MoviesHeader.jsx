@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import Search from '../search/Search';
+import Search from '../Search';
 /**
  * 
  * Allows for navigation of content

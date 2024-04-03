@@ -1,4 +1,7 @@
-import PreviewContent from "../components/preview/PreviewContent"
+import PreviewFilms from "../components/films/PreviewFilms"
+import useAuth from "../components/auth/useAuth";
+import GetStartedPage from "./GetStartedPage";
+import AuthPage from "./AuthPage";
 /**
  * 
  * Simple homepage
@@ -9,11 +12,19 @@ import PreviewContent from "../components/preview/PreviewContent"
 
 function HomePage() {
 
+  const { signedIn, getStarted } = useAuth();
+
   return (
     <div className="flex flex-col text-center">
-      <h1 className="text-6xl font-bold">Welcome to the homepage</h1>
-      <p className="text-xl mt-4">For you.</p>
-        <PreviewContent />
+      {signedIn && !getStarted && <PreviewFilms />}
+      {getStarted && <GetStartedPage />}
+      {!signedIn && 
+        <div>
+          <h1>Welcome to the Full Stack Film Recommender</h1>
+          <p>Sign in or register to get started</p>
+          <AuthPage />
+        </div>
+        }
     </div>
   );
 }

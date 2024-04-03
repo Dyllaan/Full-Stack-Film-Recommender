@@ -1,57 +1,94 @@
-import { useState } from 'react';
-import PropTypes from 'prop-types';
-/**
- * 
- * Handles a users login
- * @author Louis Figes
- * @generated GitHub Copilot was used in the creation of this code.
- * 
- */
-function SignIn(props) {
-    const { login } = props;
+import Avatar from '@mui/material/Avatar';
+import Button from '@mui/material/Button';
+import CssBaseline from '@mui/material/CssBaseline';
+import TextField from '@mui/material/TextField';
+import Grid from '@mui/material/Grid';
+import Box from '@mui/material/Box';
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import Typography from '@mui/material/Typography';
+import Container from '@mui/material/Container';
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
+import useAuth from '../auth/useAuth';
 
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
+const validationSchema = Yup.object({
+  username: Yup.string().required('Username is required'),
+  password: Yup.string().required('Password is required'),
+});
 
-    function handleEmailChange(e) {
-        setEmail(e.target.value);
-    }
+export default function SignIn() {
 
-    function handlePasswordChange(e) {
-        setPassword(e.target.value);
-    }
+    const { login } = useAuth();
 
-    function handleSubmit(e) {
-        e.preventDefault();
-        login(email, password);
-    }
+    const formik = useFormik({
+        initialValues: {
+            username: '',
+            password: '',
+        },
+        validationSchema: validationSchema,
+        onSubmit: (values) => {
+            const { username, password } = values;
+            login(username, password);
+        },
+    });
 
     return (
-        <div className="w-full">
-            <h2>Sign in</h2>
-            <form className="chi-form w-full" onSubmit={handleSubmit}>
-                <input
-                    name="email"
-                    type="text" 
-                    placeholder='Email' 
-                    onChange={handleEmailChange}
-                />
-                <input
-                    name="password"
-                    type="password" 
-                    placeholder='Password'
-                    onChange={handlePasswordChange}
-                />
-                <button type="submit">
-                    Login
-                </button>
-            </form>
-        </div>
-    )
+        <Container maxWidth="xs">
+            <CssBaseline />
+            <Box
+                sx={{
+                marginTop: 8,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                }}
+            >
+                <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
+                <LockOutlinedIcon />
+                </Avatar>
+                <Typography component="h1" variant="h5">
+                Sign in
+                </Typography>
+                <Box component="form" noValidate onSubmit={formik.handleSubmit} sx={{ mt: 3 }}>
+                <Grid container spacing={2}>
+                    <Grid item xs={12}>
+                    <TextField
+                        required
+                        fullWidth
+                        id="username"
+                        label="Username"
+                        name="username"
+                        value={formik.values.username}
+                        onChange={formik.handleChange}
+                        error={formik.touched.username && Boolean(formik.errors.username)}
+                        helperText={formik.touched.username && formik.errors.username}
+                    />
+                    </Grid>
+                    <Grid item xs={12}>
+                    <TextField
+                        required
+                        fullWidth
+                        name="password"
+                        label="Password"
+                        type="password"
+                        id="password"
+                        value={formik.values.password}
+                        onChange={formik.handleChange}
+                        error={formik.touched.password && Boolean(formik.errors.password)}
+                        helperText={formik.touched.password && formik.errors.password}
+                    />
+                    </Grid>
+                </Grid>
+                <Button
+                    type="submit"
+                    fullWidth
+                    variant="contained"
+                    sx={{ mt: 3, mb: 2 }}
+                >
+                    Sign In 
+                </Button>
+                </Box>
+            </Box>
+        </Container>
+    );
 }
-
-SignIn.propTypes = {
-    login: PropTypes.func.isRequired
-}
-
-export default SignIn;

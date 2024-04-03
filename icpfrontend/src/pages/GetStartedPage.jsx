@@ -2,7 +2,7 @@ import LoadingInPage from "../components/LoadingInPage";
 import useFetchData from "../hooks/useFetchData";
 import MoviesHeader from "../components/starter/MoviesHeader";
 import { useEffect, useState } from "react";
-import PreviewThumbnail from "../components/preview/PreviewThumbnail";
+import PreviewThumbnail from "../components/films/PreviewThumbnail";
 import Pagination from '@mui/material/Pagination';
 /**
  * 

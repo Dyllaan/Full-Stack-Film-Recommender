@@ -6,17 +6,6 @@ export default {
   ],
   theme: {
     extend: {
-      fontSize: {
-        xs: '0.7rem',
-        sm: '0.8rem',
-        base: '0.9rem',
-        lg: '1.35rem',
-        xl: '1.5rem',
-        '2xl': '1.8rem',
-        '3xl': '2rem',
-        '4xl': '2.5rem',
-        '5xl': '3rem',
-      },
       scale: {
         '1025': '1.025',
       },
@@ -24,12 +13,13 @@ export default {
         '400': '400ms',
       },
       backgroundImage: {
-        'education': "url('/education.jpg')",
+        'placeholder': "url('/placeholder.png')",
       },
       backgroundColor: {
         'custom': '#0F141C',      
-        'deep-blue': '#08052b',
-        'deep-purple': '#0f0212',
+      },
+      textColor: {
+        'off-white': '#FAF9F6',
       },
       borderColor: {
         'custom': '#181f66',
@@ -38,4 +28,3 @@ export default {
   },
   plugins: [],
 }
-
